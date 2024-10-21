@@ -12,11 +12,14 @@ import torch.nn.functional as F
 import math
 from copy import deepcopy
 
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
 
 class StableDiffusion(nn.Module):
     def __init__(
         self,
-        sd_version="2.0",
+        sd_version="1.4",#"2.0",
         step_guidance=None,
         attention_layers_to_use=[],
     ):
@@ -55,7 +58,7 @@ class StableDiffusion(nn.Module):
         self.vae.eval()
         self.text_encoder.eval()
         self.unet.eval()
-        del self.vae.decoder
+        # del self.vae.decoder
         self.scheduler = DDIMScheduler.from_config(model_key, subfolder="scheduler")
 
         self.num_train_timesteps = self.scheduler.config.num_train_timesteps
@@ -113,6 +116,7 @@ class StableDiffusion(nn.Module):
         self.alphas = self.alphas.to(device)
         self.device = device
 
+
     def get_text_embeds(self, prompt, negative_prompt, **kwargs):
         # Tokenize text and get embeddings
         text_input = self.tokenizer(
@@ -124,7 +128,7 @@ class StableDiffusion(nn.Module):
         )
 
         with torch.set_grad_enabled(False):
-            text_embeddings = self.text_encoder(text_input.input_ids)[0]
+            text_embeddings = self.text_encoder(text_input.input_ids.to(self.device))[0]
 
         # Do the same for unconditional embeddings
         uncond_input = self.tokenizer(
@@ -135,7 +139,7 @@ class StableDiffusion(nn.Module):
         )
 
         with torch.set_grad_enabled(False):
-            uncond_embeddings = self.text_encoder(uncond_input.input_ids)[0]
+            uncond_embeddings = self.text_encoder(uncond_input.input_ids.to(self.device))[0]
 
         return uncond_embeddings, text_embeddings
 
@@ -348,6 +352,41 @@ class StableDiffusion(nn.Module):
             sd_cross_attention_maps2,
             sd_self_attention_maps,
         )
+
+    def denoise_image(self, noisy_latent, text_prompt, num_steps=50):
+        """
+        Performs the backward pass to denoise the image using UNet and text conditioning.
+        
+        Args:
+        - noisy_latent (torch.Tensor): The noisy latent image.
+        - text_prompt (str): The text prompt to condition the denoising process.
+        - num_steps (int): Number of timesteps to perform denoising.
+        
+        Returns:
+        - final_image (torch.Tensor): The generated image.
+        """
+        # Step 1: Tokenize the text prompt
+        inputs = self.tokenizer(text_prompt, return_tensors="pt", truncation=True, padding="max_length", max_length=77).to(self.device)
+        text_embeddings = self.text_encoder(input_ids=inputs.input_ids).last_hidden_state
+
+        # Step 2: Iteratively denoise the image using UNet
+        latent = noisy_latent
+        for t in range(num_steps, 0, -1):
+            # Get the scheduler's timestep (scaled between 0 and 1)
+            timestep = torch.tensor([t / num_steps], dtype=torch.float32, device=self.device)
+            
+            # Predict the noise using the UNet model, conditioned on the text embeddings
+            predicted_noise = self.unet(latent, timestep, encoder_hidden_states=text_embeddings).sample
+            
+            # Denoise the latent representation (progressively remove noise)
+            latent = self.scheduler.step(predicted_noise, latent, t).prev_sample
+        
+        # Step 3: Decode the latent representation back into an image using the VAE decoder
+        final_image = self.vae.decode(latent).sample
+        
+        return final_image
+
+
 
     def produce_latents(
         self,

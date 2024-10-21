@@ -88,7 +88,7 @@ class Dataset(TorchDataset):
             )[0, 0]
             self.current_part_idx += 1
             self.current_part_idx = self.current_part_idx % self.num_parts
-            return image / 255, mask
+            return image / 255, mask, idx
         else:
             if len(self.mask_paths) > 0:
                 mask = np.load(self.mask_paths[idx])
@@ -103,7 +103,7 @@ class Dataset(TorchDataset):
                 result = self.test_transform(image=np.array(image))
                 mask = 0
             image = result["image"]
-            return image / 255, mask
+            return image / 255, mask, idx
 
     def __len__(self):
         return len(self.image_paths)

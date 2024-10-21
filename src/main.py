@@ -5,14 +5,22 @@ from src.slime import (
 )
 from src.dataset import DataModule
 from src.arguments import init_args
+import datetime
+import os
 
 
 def main():
     config = init_args()
     if config.train:
         num_parts = len(config.part_names)
+        if os.path.exists(config.output_dir):
+            current_time = datetime.datetime.now()
+            time_string = current_time.strftime("%Y%m%d_%H%M%S")
+            config.output_dir = os.path.join(config.output_dir, time_string)
     else:
         num_parts = 1
+
+
     dm = DataModule(
         train_data_dir=config.train_data_dir,
         val_data_dir=config.val_data_dir,

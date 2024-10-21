@@ -1,0 +1,154 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SliME_train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "DATADIR": "/home/benf22/data/slime/datasets/",
+                "PYTHONPATH": "${workspaceFolder}"                
+            },
+            "args": [
+            "--dataset_name", "pascal",
+            "--part_names", "background", "body", "light", "plate", "wheel", "window",
+            "--train_data_dir", "/home/benf22/data/slime/datasets/car/train_1",
+            "--val_data_dir", "/home/benf22/data/slime/datasets/car/train_1",
+            "--test_data_dir", "/home/benf22/data/slime/datasets/car/test",
+            "--min_crop_ratio", "0.6",
+            "--num_patchs_per_side", "1",
+            "--patch_size", "512",
+            "--epochs", "50",
+            "--train"
+             ]
+        },
+
+        {
+            "name": "SliME_test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"                
+            },
+            "args": [
+            "--dataset", "sample",
+            "--part_names", "background", "body", "light", "plate", "wheel", "window",
+            "--save_test_predictions",
+            "--checkpoint_dir", "/home/benf22/repos/slime/SLiMe/outputs/checkpoints/version_0/",
+            "--test_data_dir", "/home/benf22/data/slime/datasets/car/train_1"
+             ]
+        },        
+        {
+            "name": "MySliME_train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"                
+            },
+            "args": [
+            "--dataset_name", "sample",
+            "--part_names", "background", "a", "b", "c", "d",
+            "--output_dir", "/home/benf22/repos/slime/SLiMe/outputs_myslime_mix",
+            "--train_data_dir", "/home/benf22/data/slime/my_slime1/dataset_imgWO_gtW",
+            "--val_data_dir", "/home/benf22/data/slime/my_slime1/dataset_imgWO_gtW",
+            "--test_data_dir", "/home/benf22/data/slime/my_slime1/dataset_imgWO_gtW",
+            "--min_crop_ratio", "0.6",
+            "--num_patchs_per_side", "1",
+            "--patch_size", "512",
+            "--epochs", "50",
+            "--save_test_predictions",
+            "--train"
+             ]
+        },      
+        {
+            "name": "MySliME_test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"                
+            },
+            "args": [
+            "--dataset", "sample",
+            "--part_names", "background", "a", "b", "c", "d",
+            "--save_test_predictions",
+            "--checkpoint_dir", "/home/benf22/repos/slime/SLiMe/outputs_myslime/20240909_194741/checkpoints/version_0",
+            // "--checkpoint_dir", "/home/benf22/repos/slime/SLiMe/outputs_myslime_mix/checkpoints/version_0/",
+            "--test_data_dir", "/home/benf22/data/slime/my_slime1/dataset_without"
+             ]
+        },   
+//////////////////////////// Exp2
+{
+    "name": "MySliME_train_exp2",
+    "type": "python",
+    "request": "launch",
+    "program": "${workspaceFolder}/src/main.py",
+    "console": "integratedTerminal",
+    "env": {
+        "PYTHONPATH": "${workspaceFolder}"                
+    },
+    "args": [
+    "--dataset_name", "sample",
+    "--part_names", "background", "a", "battery", "c", "d", "e", "f",
+    "--text_prompt", "text promps"
+    "--output_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2/output",
+    "--train_data_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2/train",
+    "--val_data_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2/train",
+    "--test_data_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2",
+    "--min_crop_ratio", "0.6",
+    "--num_patchs_per_side", "1",
+    "--patch_size", "512",
+    "--epochs", "100",
+    "--save_test_predictions",
+    "--train"
+     ]
+},      
+{
+    "name": "MySliME_test_exp2",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "${workspaceFolder}/src/main.py",
+    "console": "integratedTerminal",
+    "env": {
+        "PYTHONPATH": "${workspaceFolder}"                
+    },
+    "args": [
+    "--dataset", "sample",
+    "--part_names", "background", "a", "b", "c", "d", "e", "f",
+    "--save_test_predictions",
+    "--checkpoint_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2/output/20240918_155157/checkpoints/version_0/",
+    // "--checkpoint_dir", "/home/benf22/repos/slime/SLiMe/outputs_myslime_mix/checkpoints/version_0/",
+    "--test_data_dir", "/home/benf22/data/slime/my_slime2/1moving_cube_2"
+     ]
+},   
+////////////////                       
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+        }
+    ],
+    "tasks": [
+        {
+            "label": "start-tmux",
+            "type": "shell",
+            "command": "tmux new-session -d -s mysession 'python ${workspaceFolder}/path/to/your_script.py'",
+            "problemMatcher": []
+        },
+        {
+            "label": "cleanup-tmux",
+            "type": "shell",
+            "command": "tmux kill-session -t mysession",
+            "problemMatcher": []
+        }
+    ]    
+}
